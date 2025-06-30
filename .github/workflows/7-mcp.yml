@@ -1,12 +1,12 @@
-name: Step 7, Connect Agent to MCP Tools
+name: Step 7 - Connect Agent to MCP Tools
 
 on:
-  workflow_dispatch:
   push:
-    paths:
-      - "packages/node-os-mcp/**"
     branches:
       - main
+    paths:
+      - 'packages/node-os-mcp/'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,31 +18,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Show current directory and files (debug)
+        run: |
+          pwd
+          ls -al .
+          ls -al ./packages
+          ls -al ./packages/node-os-mcp
+
       - id: get_step
         run: |
-          echo "current_step=$(cat ./.github/steps/-step.txt)" >> $GITHUB_OUTPUT
+          echo "Current step file contents:" && cat ./.github/steps/-step.txt
+          step=$(cat ./.github/steps/-step.txt | tr -d '\r\n ')
+          echo "::notice::Step value after strip: '$step'"
+          echo "current_step=$step" >> $GITHUB_OUTPUT
+        shell: bash
     outputs:
       current_step: ${{ steps.get_step.outputs.current_step }}
 
-  on_agent_directory:
+  on_node_os_mcp_directory:
     name: On addition of node-os-mcp directory
     needs: get_current_step
-
     if: >-
-      ${{ !github.event.repository.is_template
-          && needs.get_current_step.outputs.current_step == 7 }}
+      ${{ !github.event.repository.is_template &&
+          needs.get_current_step.outputs.current_step == '7' }}
 
     runs-on: ubuntu-latest
 
     steps:
-      # We'll need to check out the repository to verify the agent directory exists
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Let's get all the branches
 
-      - name: Check node-os-mcp directory exists
-        id: check_node-os-mcp
+      - name: Confirm node-os-mcp folder exists
+        id: check_node_os_mcp
         run: |
           if [ -d "packages/node-os-mcp" ]; then
             echo "agent_exists=true" >> $GITHUB_OUTPUT
@@ -50,8 +58,8 @@ jobs:
             echo "agent_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update to step 8
-        if: steps.check_node-os-mcp.outputs.node-os-mcp_exists == 'true'
+      - name: Update to Step 8
+        if: steps.check_node_os_mcp.outputs.agent_exists == 'true'
         uses: skills/action-update-step@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
