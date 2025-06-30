@@ -1,0 +1,8 @@
+type: bing_grounding
+id: bing_search
+options:
+  tool_connections:
+    - subscription_ID = Your Azure Subscription id
+    - resource_group_name = alumasaaquinatta-4881 (alumasaaquinatta-4881-resource/alumasaaquinatta-4881)
+    - project_name = alumasaaquinatta-4881
+    - bing_grounding_connection_name = alumasaaquinatta-4881 (alumasaaquinatta-4881-resource/alumasaaquinatta-4881)
